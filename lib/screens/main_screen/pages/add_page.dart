@@ -1,4 +1,8 @@
+import 'package:extended_image/extended_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../enums/delivery_type.dart';
@@ -33,13 +37,13 @@ class _AddPageState extends State<AddPage> {
   ProdConditionEnum _condition = ProdConditionEnum.NEW;
   ProdPrivacyTypeEnum _privacy = ProdPrivacyTypeEnum.PUBLIC;
   DeliveryTypeEnum _delivery = DeliveryTypeEnum.DELIVERY;
-
+  final ImagePicker _picker = ImagePicker();
   final TextEditingController _description = TextEditingController();
   final TextEditingController _price = TextEditingController();
   final TextEditingController _quantity = TextEditingController(text: '1');
   final TextEditingController _deliveryFee = TextEditingController(text: '0');
   bool _acceptOffer = true;
-  final List<PlatformFile> _files = <PlatformFile>[];
+  List<XFile>? _imageFileList;
 
   @override
   void initState() {
@@ -107,14 +111,17 @@ class _AddPageState extends State<AddPage> {
   }
 
   _fetchMedia() async {
-    final FilePickerResult? _result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-      type: FileType.media,
-    );
-    if (_result == null) return;
-    _files.clear();
-    _files.addAll(_result.files);
-    setState(() {});
+    try {
+      final pickedFileList = await _picker.pickMultiImage();
+      setState(() {
+        _imageFileList = pickedFileList;
+      });
+      print(_imageFileList!.length);
+    } catch (e) {
+      setState(() {
+        print(e);
+      });
+    }
   }
 
   Column _infoSection(ProdCatProvider category) {
